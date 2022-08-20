@@ -9,17 +9,22 @@ ogg_page VideoManager::og;
 ogg_packet VideoManager::op;
 ogg_stream_state VideoManager::vo;
 ogg_stream_state VideoManager::to;
+// TODO: Either add theora compilation or clean this up
+#ifndef __EMSCRIPTEN__
 th_info VideoManager::ti;
 th_comment VideoManager::tc;
 th_dec_ctx *VideoManager::td    = NULL;
 th_setup_info *VideoManager::ts = NULL;
 
 th_pixel_fmt VideoManager::pixelFormat;
+#endif
 ogg_int64_t VideoManager::granulePos = 0;
 bool32 VideoManager::initializing    = false;
 
 bool32 RSDK::LoadVideo(const char *filename, double startDelay, bool32 (*skipCallback)())
 {
+// TODO: Either add theora compilation or clean this up
+#ifndef __EMSCRIPTEN__
     if (ENGINE_VERSION == 5 && sceneInfo.state == ENGINESTATE_VIDEOPLAYBACK)
         return false;
 #if RETRO_REV0U
@@ -191,10 +196,16 @@ bool32 RSDK::LoadVideo(const char *filename, double startDelay, bool32 (*skipCal
     }
 
     return false;
+#else
+        return true;
+#endif
 }
 
 void RSDK::ProcessVideo()
 {
+    // TODO: Either add theora compilation or clean this up
+#ifndef __EMSCRIPTEN__
+
     bool32 finished = false;
     double curTime  = 0;
     if (!VideoManager::initializing) {
@@ -265,7 +276,7 @@ void RSDK::ProcessVideo()
     if (finished) {
         CloseFile(&VideoManager::file);
 
-        // Flush everything out
+        Flush everything out
         while (ogg_sync_pageout(&VideoManager::oy, &VideoManager::og) > 0) ogg_stream_pagein(&VideoManager::to, &VideoManager::og);
 
         ogg_stream_clear(&VideoManager::to);
@@ -283,4 +294,5 @@ void RSDK::ProcessVideo()
             RSDK::Legacy::gameMode = engine.storedState;
 #endif
     }
+#endif
 }

@@ -12,12 +12,15 @@ struct VideoManager {
     static ogg_stream_state vo;
     static ogg_stream_state to;
     static ogg_packet op;
+// TODO: Either add theora compilation or clean this up
+#ifndef __EMSCRIPTEN__
     static th_info ti;
     static th_comment tc;
     static th_dec_ctx *td;
     static th_setup_info *ts;
 
     static th_pixel_fmt pixelFormat;
+#endif
     static ogg_int64_t granulePos;
     static bool32 initializing;
 };

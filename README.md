@@ -29,6 +29,12 @@ First, follow the steps in [the common dependency README](./dependencies/all/REA
   * Then, for both platforms, the makefile can be used by running `make`.
     * For Switch, pass `PLATFORM=Switch` to the `make` command to ensure you're building for Switch.
 
+* ## Emscripten (Web Assembly)
+  * [Set up your Emscripten environment](https://emscripten.org/docs/getting_started/downloads.html)
+  * (For the time being) Place `Data.rsdk` in the root of this repo
+    * PLEASE DO NOT ACCIDENTALLY PUSH IT ONTO GITHUB, it's in the `.gitignore` but still be careful
+  * `emmake make PLATFORM=Emscripten`
+
 * ### [Android](./dependencies/android/README.md)
 
 ### Other Platforms

@@ -86,6 +86,7 @@ enum GameRegions {
 #define RETRO_iOS     (6)
 #define RETRO_ANDROID (7)
 #define RETRO_UWP     (8)
+#define RETRO_EMSCRIPTEN     (9)
 
 // ============================
 // PLATFORMS (used mostly in legacy but could come in handy here)
@@ -137,6 +138,9 @@ enum GameRegions {
 #elif defined __linux__
 #define RETRO_PLATFORM   (RETRO_LINUX)
 #define RETRO_DEVICETYPE (RETRO_STANDARD)
+#elif defined __EMSCRIPTEN__
+#define RETRO_PLATFORM   (RETRO_EMSCRIPTEN)
+#define RETRO_DEVICETYPE (RETRO_MOBILE)
 #else
 #define RETRO_PLATFORM   (RETRO_WIN)
 #define RETRO_DEVICETYPE (RETRO_STANDARD)
@@ -380,6 +384,17 @@ enum GameRegions {
 #undef RETRO_INPUTDEVICE_SDL2
 #define RETRO_INPUTDEVICE_SDL2 (1)
 
+#elif RETRO_PLATFORM == RETRO_EMSCRIPTEN
+
+#undef RETRO_RENDERDEVICE_SDL2
+#define RETRO_RENDERDEVICE_SDL2 (1)
+
+#undef RETRO_AUDIODEVICE_SDL2
+#define RETRO_AUDIODEVICE_SDL2 (1)
+
+#undef RETRO_INPUTDEVICE_SDL2
+#define RETRO_INPUTDEVICE_SDL2 (1)
+
 #endif
 
 #if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_UWP
@@ -440,7 +455,7 @@ enum GameRegions {
 #include <SDL2/SDL.h>
 
 #include "cocoaHelpers.hpp"
-#elif RETRO_PLATFORM == RETRO_LINUX || RETRO_PLATFORM == RETRO_SWITCH
+#elif RETRO_PLATFORM == RETRO_LINUX || RETRO_PLATFORM == RETRO_SWITCH || RETRO_PLATFORM == RETRO_EMSCRIPTEN
 
 #if RETRO_RENDERDEVICE_GLFW
 #include <GL/glew.h>
@@ -455,7 +470,8 @@ enum GameRegions {
 #include <SDL2/SDL.h>
 #endif // ! RETRO_RENDERDEVICE_SDL2
 
-#include <theora/theoradec.h>
+// #include <theora/theoradec.h>
+#include <ogg/ogg.h>
 
 #if RETRO_PLATFORM == RETRO_SWITCH
 #define PrintConsole _PrintConsole
@@ -531,8 +547,8 @@ struct RetroEngine {
     bool32 useExternalCode = false;
 #endif
 
-    bool32 devMenu        = false;
-    bool32 consoleEnabled = false;
+    bool32 devMenu        = true;
+    bool32 consoleEnabled = true;
 
     bool32 confirmFlip = false; // swaps A/B, used for nintendo and etc controllers
     bool32 XYFlip      = false; // swaps X/Y, used for nintendo and etc controllers

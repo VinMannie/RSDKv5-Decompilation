@@ -8,6 +8,8 @@ DEBUG		?= 1
 VERBOSE		?= 0
 PROFILE		?= 0
 
+OPTIMIZATION_FLAGS = -O3
+
 RSDK_ONLY   ?= 0
 
 
@@ -95,8 +97,8 @@ ifeq ($(DEBUG),1)
 	CFLAGS += -g
 	STRIP = :
 else
-	CXXFLAGS += -O3
-	CFLAGS += -O3
+	CXXFLAGS += $(OPTIMIZATION_FLAGS)
+	CFLAGS += $(OPTIMIZATION_FLAGS)
 endif
 
 ifeq ($(STATIC),1)
