@@ -89,7 +89,9 @@ bool RenderDevice::Init()
     glfwSetJoystickCallback(ProcessJoystickEvent);
     glfwSetMouseButtonCallback(window, ProcessMouseEvent);
     glfwSetWindowFocusCallback(window, ProcessFocusEvent);
+    #ifndef __EMSCRIPTEN__
     glfwSetWindowMaximizeCallback(window, ProcessMaximizeEvent);
+    #endif
 
     if (!SetupRendering() || !AudioDevice::Init())
         return false;
@@ -682,7 +684,9 @@ void RenderDevice::RefreshWindow()
     glfwSetKeyCallback(window, ProcessKeyEvent);
     glfwSetMouseButtonCallback(window, ProcessMouseEvent);
     glfwSetWindowFocusCallback(window, ProcessFocusEvent);
+    #ifndef __EMSCRIPTEN__
     glfwSetWindowMaximizeCallback(window, ProcessMaximizeEvent);
+    #endif
 
     glfwMakeContextCurrent(window);
 
