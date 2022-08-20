@@ -396,11 +396,35 @@ void RenderDevice::InitFPSCap()
 }
 bool RenderDevice::CheckFPSCap()
 {
+    // Borrowed from https://github.com/cuckydev/SoniCPort/blob/8976e22aa20ace8cb06cef15dba654a393e05053/src/Backend/SDL2/Render.c#L101
+#ifdef ALTERNATE_LOOP_TIMING
+    static const unsigned int delays[3] = {17, 16, 17};
+    static unsigned int counter;
+    
+    static uint32_t time_prev;
+    const uint32_t time_now = SDL_GetTicks();
+    const uint32_t time_next = time_prev + delays[counter % 3];
+    
+    if (time_now >= time_prev + 100)
+    {
+        time_prev = time_now;
+    }
+    else
+    {
+        if (time_now < time_next)
+            SDL_Delay(time_next - time_now);
+        time_prev += delays[counter % 3];
+    }
+    
+    counter++;
+    return true;
+#else // Original
     curTicks = SDL_GetPerformanceCounter();
     if (curTicks >= prevTicks + targetFreq)
         return true;
 
     return false;
+#endif
 }
 void RenderDevice::UpdateFPSCap() { prevTicks = curTicks; }
 
