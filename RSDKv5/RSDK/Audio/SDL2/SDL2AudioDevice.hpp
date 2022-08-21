@@ -15,9 +15,13 @@ public:
 
     inline static void HandleStreamLoad(ChannelInfo *channel, bool32 async)
     {
+        // haha i will maliciously disable threading for web users just to piss them off with stutters
+        // (just kidding it's because threads don't exist in js) 
+        #ifndef __EMSCRIPTEN__
         if (async)
             SDL_CreateThread((SDL_ThreadFunction)LoadStream, "LoadStream", (void *)channel);
         else
+        #endif
             LoadStream(channel);
     }
 
