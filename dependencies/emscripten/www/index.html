@@ -1,0 +1,293 @@
+
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>Sonic Mania</title>
+    <style>
+      html, body {
+        height: 100%;
+      }
+
+      body {
+        font-family: arial;
+        margin: 0;
+        padding: none;
+		color: white;
+        background-color: black;
+        background-repeat: repeat;
+      }
+/* 
+      #status {
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 2rem;
+        margin-left: 20px;
+        font-weight: bold;
+        color: rgb(120, 120, 120);
+      }
+
+      #progress {
+        height: 20px;
+        width: 300px;
+      }
+*/
+	.container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100% !important;
+          height: 100% !important;
+          padding: 0 !important;
+		  display: flex;
+		align-items: center;
+		justify-content: center;
+      }
+
+	.container .outer {
+		width: 100%;
+		padding-top: 56.25%;
+		position: relative;
+	}
+	.container .outer #canvas {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		width: 100% !important;
+		height: 100% !important;
+		image-rendering: pixelated;
+		image-rendering: -moz-crisp-edges;
+		image-rendering: crisp-edges;
+	}
+
+      #container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width:100%;
+        text-align: center;
+      }
+
+	  #root {
+		  color: black;
+	  }
+
+	  .section {
+		  display: none;
+	  }
+
+    </style>
+  </head>
+  <body>
+    <div class="emscripten" id="status">Downloading...</div>
+
+    <div class="emscripten">
+      <progress value="0" max="100" id="progress" hidden=1></progress>
+    </div>
+    
+	<div class="container">
+		<div class="outer">
+			<canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1" style="z-index:-9999;"></canvas>
+		</div>
+	</div>
+
+    <div id="container">
+        <div id="section_upload" class="section">
+            You need to upload a legitimate Sonic Mania Data.rsdk.<br>
+            You can get this by buying the game on Steam, or some other platform.<br>
+            If bought on Steam, it should be at one of these locations:<br>
+            <br>
+            <span style="font-size:8px">
+                    Windows: C:\Program Files (x86)\Steam\steamapps\common\<br>
+                    macOS: ~/Library/Application Support/Steam/steamapps/<br>
+                    Linux: ~/.steam/steam/steamapps/<br>
+            </span>
+        </div>
+		
+		<div id="section_filemanager" class="section">
+			<!-- React root for filemanager -->
+			<div id="root" class="hidden"></div>
+      <br>
+      <button onclick="window.location.reload()">Refresh</button>
+		</div>
+    
+        <div id="section_start" class="section">
+            <button onclick="EmscriptenStart()">Start Game</button>
+            <button onclick="ShowFilemanager()">File Manager</button>
+
+        </div>
+    </div>
+
+    <script type='text/javascript'>
+      var statusElement = document.getElementById('status');
+      var progressElement = document.getElementById('progress');
+
+      var Module = {
+        arguments: [""],
+        noInitialRun: true,
+        preRun: [],
+        postRun: [],
+        print: (function() {
+          return function(text) {
+            if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+            console.log(text);
+          };
+        })(),
+        printErr: function(text) {
+          if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+          console.error(text);
+        },
+        canvas: (function() {
+          var canvas = document.getElementById('canvas');
+
+          // As a default initial behavior, pop up an alert when webgl context is lost. To make your
+          // application robust, you may want to override this behavior before shipping!
+          // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+          canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+
+          return canvas;
+        })(),
+        setStatus: function(text) {
+          if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+          if (text === Module.setStatus.last.text) return;
+          var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+          var now = Date.now();
+          if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
+          Module.setStatus.last.time = now;
+          Module.setStatus.last.text = text;
+          if (m) {
+            text = m[1];
+            progressElement.value = parseInt(m[2])*100;
+            progressElement.max = parseInt(m[4])*100;
+            progressElement.hidden = false;
+          } else {
+            progressElement.value = null;
+            progressElement.max = null;
+            progressElement.hidden = true;
+          }
+          statusElement.innerHTML = text;
+        },
+        totalDependencies: 0,
+        monitorRunDependencies: function(left) {
+          this.totalDependencies = Math.max(this.totalDependencies, left);
+          Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+          if (!left) FSInit();
+        }
+      };
+      Module.setStatus('Downloading...');
+      window.onerror = function(event) {
+        // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
+        Module.setStatus('Exception thrown, see JavaScript console');
+        Module.setStatus = function(text) {
+          if (text) Module.printErr('[post-exception status] ' + text);
+        };
+      };
+    </script>
+    <script type="text/javascript" src="./RSDKv5.js"></script>
+    <script type="text/javascript" src="./jquery-3.5.1.slim.min.js"></script>
+	<script type="text/javascript" src="./browserfs.js"></script>
+  <script>
+
+    
+    function EmscriptenStart() {
+        $("#container").hide();
+        $("#status").hide();
+        Module._main();
+    }
+
+		function HideSections() {
+			$(".section").each(function() { $(this).hide(); });
+		}
+
+		function ShowFilemanager() {
+			HideSections();
+			$("#section_filemanager").show();
+		}
+		
+        function ShowUpload() {
+			HideSections();
+            $("#section_upload").show();
+			$("#section_filemanager").show();
+		}
+        
+        function ShowStart() {
+			HideSections()
+			$("#section_start").show();
+        }
+				
+		async function FSInit() {
+			// BrowserFS.configure() takes some time to run so we need to make sure it's done before we try to mount it.
+			await new Promise((resolve, reject) => {
+				BrowserFS.configure({
+					fs: "AsyncMirror",
+					options: {
+						sync: { fs: "InMemory" },
+						async: {
+							fs: "IndexedDB",
+							options: {
+								storeName: "idbfs"
+							}
+						}
+					}
+				}, e => {
+					if (e) reject(e);
+					resolve();
+				});
+			});
+
+      // Sappharad:
+      // Before we mount BrowserFS, we need to patch abort() to bypass a bug in the implementation of stat().
+      // In Vanilla Emscripten FS, if you call stat() for a file that does not exist, it throws an exception with error code 44.
+      // But BrowserFS does not throw a compatible exception, so I'm going to cheat and make it compatible.
+      // Ideally I should fix BrowserFS and send them a pull request, but this solution is a quick fix until I do.
+
+      var originalAbort = abort;
+      abort = function (what) {
+        console.log(what);
+        if (what.stack.indexOf('browserfs') > 0) {
+          what.errno = 44;
+          return;
+        }
+        originalAbort(what);
+      };
+
+			let BFS = new BrowserFS.EmscriptenFS(
+				Module.FS,
+				Module.PATH,
+				Module.ERRNO_CODES
+			);
+			FS.mkdir("/idbfs");
+			FS.mount(BFS, { root: '/' }, '/idbfs');
+			await new Promise((resolve, reject) => {
+				FS.syncfs(true, err => {
+					if (err) reject();
+					resolve();
+				});
+			});
+      // Ensure mods dir exists or game crashes because fuck you that's why
+      try {
+        FS.mkdir("/idbfs/mods");
+      } catch(e) { }
+			try {
+				FS.stat("/idbfs/Data.rsdk");
+			} catch (e) {
+				ShowUpload();
+				return;
+			}
+			ShowStart();
+		};
+    </script>
+	<script type="text/javascript" src="./fileManagerRuntime.js"></script>
+	<script type="text/javascript" src="./react.js"></script>
+	<script type="text/javascript" src="./filemanager.js"></script>
+</script>
+  </body>
+</html>
+
+

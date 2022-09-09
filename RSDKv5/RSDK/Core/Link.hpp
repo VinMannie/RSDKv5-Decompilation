@@ -1,6 +1,11 @@
 #ifndef LINK_H
 #define LINK_H
 
+// ngl I don't remember why I put this here
+#ifdef __EMSCRIPTEN__
+#include <filesystem>
+#endif
+
 namespace RSDK
 {
 
@@ -429,7 +434,7 @@ public:
     {
         // BE WARNED: this is ifdef hell
         // still better than the mess we had before
-#if RETRO_PLATFORM == RETRO_SWITCH || RETRO_PLATFORM == RETRO_EMSCRIPTEN
+#if RETRO_PLATFORM == RETRO_SWITCH
         return NULL;
 #else
         std::string prepath = path;

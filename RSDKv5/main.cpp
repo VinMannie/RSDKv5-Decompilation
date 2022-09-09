@@ -26,6 +26,10 @@ static void initNxLink()
 }
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <unistd.h>
+#endif
+
 #if RETRO_STANDALONE
 
 #if RETRO_RENDERDEVICE_DIRECTX9 || RETRO_RENDERDEVICE_DIRECTX11
@@ -77,6 +81,10 @@ int32 RSDK_main(int32 argc, char **argv, void *linkLogicPtr)
 {
 #ifdef __SWITCH__
     // initNxLink();
+#endif
+
+#ifdef __EMSCRIPTEN__
+    chdir("/idbfs");
 #endif
 
     RSDK::linkGameLogic = (RSDK::LogicLinkHandle)linkLogicPtr;
